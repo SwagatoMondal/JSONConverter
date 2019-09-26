@@ -2,6 +2,7 @@ package com.swag.sample;
 
 import androidx.annotation.Nullable;
 
+import com.swag.jsonconverter.Ignore;
 import com.swag.jsonconverter.JSONConverter;
 
 import org.json.JSONObject;
@@ -19,6 +20,8 @@ public class Entity {
     private Long LongVar = 2000L;
     private String string = "Random string";
     public InnerEntity1 innerEntity1 = new InnerEntity1(new InnerEntity2("New Inner2 String"));
+    @Ignore
+    private String extra = "Entity : Extra string to be ignored";
 
     public Entity() {
     }
@@ -40,6 +43,8 @@ public class Entity {
 
     public static class InnerEntity2 implements JSONConverter.JSONEntity {
         private String string = "Inner2 string";
+        @Ignore
+        private String extra = "InnerEntity2 : Extra string to be ignored";
 
         public InnerEntity2() {}
 

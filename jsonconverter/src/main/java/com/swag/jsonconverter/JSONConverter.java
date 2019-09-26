@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -25,6 +26,16 @@ public class JSONConverter {
         return name;
     }
 
+    private static boolean shouldIgnore(Field field) {
+        for (Annotation annotation : field.getAnnotations()) {
+            System.out.println("Annotation : " + field.getName() + ";; " + annotation.getClass());
+            if (Ignore.class == annotation.getClass()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Nullable
     public static JSONObject toJSON(@NonNull Object object) {
         try {
@@ -33,8 +44,10 @@ public class JSONConverter {
             for (Field field : type.getDeclaredFields()) {
                 Class<?> fieldType = field.getType();
 
-                // Ignore static variables
+                // Ignore static, and force ignored variables
                 if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                } else if (field.isAnnotationPresent(Ignore.class)) {
                     continue;
                 }
 
@@ -98,8 +111,10 @@ public class JSONConverter {
                 Class fieldType = field.getType();
                 Log.i(TAG, "fromJSON : Field type : " + fieldType.getSimpleName());
 
-                // Ignore static variables
+                // Ignore static, and force ignored variables
                 if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                } else if (field.isAnnotationPresent(Ignore.class)) {
                     continue;
                 }
 
