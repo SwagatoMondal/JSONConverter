@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 
 import org.json.JSONObject;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -26,16 +25,14 @@ public class JSONConverter {
         return name;
     }
 
-    private static boolean shouldIgnore(Field field) {
-        for (Annotation annotation : field.getAnnotations()) {
-            System.out.println("Annotation : " + field.getName() + ";; " + annotation.getClass());
-            if (Ignore.class == annotation.getClass()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    /**
+     * Method to convert the given object to an equivalent {@link JSONObject}. This method will also
+     * consider the member variables which implements {@link JSONEntity} in the conversion process
+     * in infinite cycle. Any variable whose type doesn't fall under the types supported type by
+     * {@link JSONObject} and {@link JSONEntity} will be ignored.
+     * @param object The object to be converted
+     * @return the equivalent {@link JSONObject}, otherwise {@code null}
+     */
     @Nullable
     public static JSONObject toJSON(@NonNull Object object) {
         try {
@@ -96,10 +93,16 @@ public class JSONConverter {
         }
     }
 
-    public static Object fromJSON(@NonNull String string, Class<? extends  Object> type) {
+    /**
+     * Method to convert the given {@link JSONObject} to an object equivalent to the given type.
+     * Ensure the given object(s) taken into conversion has a default zero argument constructor.
+     * @param jsonObject JSON equivalent of the object to converted
+     * @param type type of the final object to constructed
+     * @return an equivalent object of the given type filled with the values in the given JSON,
+     * otherwise {@code null} in error scenario.
+     */
+    public static Object fromJSON(@NonNull JSONObject jsonObject, @NonNull Class<? extends  Object> type) {
         try {
-            JSONObject jsonObject = new JSONObject(string);
-
             Object object;
             try {
                 object = type.getConstructor().newInstance();
@@ -145,7 +148,7 @@ public class JSONConverter {
                 } else if (JSONEntity.class.isAssignableFrom(fieldType)) {
                     final JSONObject obj = jsonObject.getJSONObject(field.getName());
                     Log.i(TAG, "fromJSON : Found JSONEntity - " + obj.toString());
-                    field.set(object, fromJSON(obj.toString(), Class.forName(obj.getString(TYPE))));
+                    field.set(object, fromJSON(obj, Class.forName(obj.getString(TYPE))));
                 } else {
                     Log.i(TAG, "fromJSON : Ignoring field, as type can't be converted");
                 }

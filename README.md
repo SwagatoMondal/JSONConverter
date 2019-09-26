@@ -2,7 +2,10 @@
 A simple Java object to JSONObject and vice versa converter
 
 ## How to use
-Ensure that the object you want to convert has a default public constructor
+Ensure that the object you want to convert has a **default zero argument public constructor**. If your
+class has non-primitive type member variables, ensure that those classes implement JSONEntity in order
+to be considered for conversion. For further reference, refer the classes in this package :
+https://github.com/SwagatoMondal/JSONConverter/tree/master/jsonconverter/src/androidTest/java/com/swag/jsonconverter/sample
 ### Convert Java object to JSONObject
 Use JSONConverter.toJSON(obj) : JSONObject
 ### Convert JSONObject to Java object

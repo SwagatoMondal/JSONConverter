@@ -28,7 +28,7 @@ public class JSONConverterTest {
         final JSONObject result = JSONConverter.toJSON(entity);
         Assert.assertNotNull("Found result null", result);
         Log.d(TAG, "Result : " + result.toString());
-        final Object conversion = JSONConverter.fromJSON(result.toString(), Entity.class);
+        final Object conversion = JSONConverter.fromJSON(result, Entity.class);
         Assert.assertNotNull("Found conversion null", conversion);
         Assert.assertEquals(entity, conversion);
     }
