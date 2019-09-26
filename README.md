@@ -2,6 +2,7 @@
 A simple Java object to JSONObject and vice versa converter
 
 ## How to use
+Ensure that the object you want to convert has a default public constructor
 ### Convert Java object to JSONObject
 Use JSONConverter.toJSON(obj) : JSONObject
 ### Convert JSONObject to Java object

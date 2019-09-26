@@ -4,7 +4,7 @@ import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.swag.sample.Entity;
+import com.swag.jsonconverter.sample.Entity;
 
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -22,7 +22,7 @@ public class JSONConverterTest {
     private static final String TAG = JSONConverterTest.class.getSimpleName();
 
     @Test
-    public void useAppContext() {
+    public void testFeature() {
         Entity entity = new Entity();
         entity.innerEntity1.innerEntity2 = new Entity.InnerEntity2("Test JSON string");
         final JSONObject result = JSONConverter.toJSON(entity);

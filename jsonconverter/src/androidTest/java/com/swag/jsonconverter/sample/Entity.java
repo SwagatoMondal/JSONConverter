@@ -1,4 +1,4 @@
-package com.swag.sample;
+package com.swag.jsonconverter.sample;
 
 import androidx.annotation.Nullable;
 
