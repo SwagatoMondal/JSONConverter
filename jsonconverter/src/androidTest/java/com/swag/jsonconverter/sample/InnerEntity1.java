@@ -3,12 +3,10 @@ package com.swag.jsonconverter.sample;
 import androidx.annotation.Nullable;
 
 import com.swag.jsonconverter.Ignore;
-import com.swag.jsonconverter.JSONConverter;
 
-import org.json.JSONObject;
-
-public class InnerEntity1 implements JSONConverter.JSONEntity {
+public class InnerEntity1 {
     public Entity.InnerEntity2 innerEntity2;
+    private String string = "Inner1 string";
     @Ignore
     private String extra = "InnerEntity1 : Extra string to be ignored";
 
@@ -26,10 +24,5 @@ public class InnerEntity1 implements JSONConverter.JSONEntity {
         } else {
             return false;
         }
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return JSONConverter.toJSON(this);
     }
 }

@@ -41,7 +41,7 @@ public class Entity {
         }
     }
 
-    public static class InnerEntity2 implements JSONConverter.JSONEntity {
+    public static class InnerEntity2 {
         private String string = "Inner2 string";
         @Ignore
         private String extra = "InnerEntity2 : Extra string to be ignored";
@@ -60,11 +60,6 @@ public class Entity {
             } else {
                 return false;
             }
-        }
-
-        @Override
-        public JSONObject toJSON() {
-            return JSONConverter.toJSON(this);
         }
     }
 }

@@ -8,7 +8,6 @@ import androidx.annotation.Nullable;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 public class JSONConverter {
@@ -27,9 +26,8 @@ public class JSONConverter {
 
     /**
      * Method to convert the given object to an equivalent {@link JSONObject}. This method will also
-     * consider the member variables which implements {@link JSONEntity} in the conversion process
-     * in infinite cycle. Any variable whose type doesn't fall under the types supported type by
-     * {@link JSONObject} and {@link JSONEntity} will be ignored.
+     * consider the member variables in the conversion process in infinite cycle. Any variable
+     * whose type doesn't fall under the types supported type by {@link JSONObject} will be ignored.
      * @param object The object to be converted
      * @return the equivalent {@link JSONObject}, otherwise {@code null}
      */
@@ -72,16 +70,19 @@ public class JSONConverter {
                     jsonObject.put(field.getName(), field.get(object) == null ? null : (long) field.get(object));
                 } else if (String.class == fieldType) {
                     jsonObject.put(field.getName(), field.get(object));
-                } else if (JSONEntity.class.isAssignableFrom(fieldType)) {
-                    final Method toJSON = fieldType.getMethod("toJSON");
-                    final Object fieldObj = toJSON.invoke(field.get(object));
-                    if (fieldObj != null) {
-                        JSONObject fieldJson = (JSONObject) fieldObj;
-                        fieldJson.put(TYPE, getName(fieldType));
-                        jsonObject.put(field.getName(), fieldJson);
-                    }
                 } else {
-                    Log.i(TAG, "toJSON : Ignoring field, as type can't be converted");
+                    final Object fieldObj = field.get(object);
+                    if (fieldObj != null) {
+                        JSONObject fieldJson = toJSON(fieldObj);
+                        if (fieldJson != null) {
+                            fieldJson.put(TYPE, getName(fieldType));
+                        } else {
+                            Log.i(TAG, "toJSON : Ignoring field, as null JSON");
+                        }
+                        jsonObject.put(field.getName(), fieldJson);
+                    } else {
+                        Log.i(TAG, "toJSON : Ignoring field, as type can't be converted");
+                    }
                 }
             }
             Log.i(TAG, "Returning string");
@@ -145,12 +146,14 @@ public class JSONConverter {
                     field.set(object, jsonObject.getLong(field.getName()));
                 } else if (String.class == fieldType) {
                     field.set(object, jsonObject.getString(field.getName()));
-                } else if (JSONEntity.class.isAssignableFrom(fieldType)) {
-                    final JSONObject obj = jsonObject.getJSONObject(field.getName());
-                    Log.i(TAG, "fromJSON : Found JSONEntity - " + obj.toString());
-                    field.set(object, fromJSON(obj, Class.forName(obj.getString(TYPE))));
                 } else {
-                    Log.i(TAG, "fromJSON : Ignoring field, as type can't be converted");
+                    final JSONObject obj = jsonObject.optJSONObject(field.getName());
+                    if (obj != null && obj.has(TYPE)) {
+                        Log.i(TAG, "fromJSON : Found JSONObject - " + obj.toString());
+                        field.set(object, fromJSON(obj, Class.forName(obj.getString(TYPE))));
+                    } else {
+                        Log.i(TAG, "fromJSON : Found null JSONObject or malformed object, hence ignored");
+                    }
                 }
             }
 
@@ -159,9 +162,5 @@ public class JSONConverter {
             e.printStackTrace();
             return null;
         }
-    }
-
-    public interface JSONEntity {
-        JSONObject toJSON();
     }
 }
