@@ -3,9 +3,6 @@ package com.swag.jsonconverter.sample;
 import androidx.annotation.Nullable;
 
 import com.swag.jsonconverter.Ignore;
-import com.swag.jsonconverter.JSONConverter;
-
-import org.json.JSONObject;
 
 public class Entity {
     private boolean boolVar = true;
@@ -19,7 +16,7 @@ public class Entity {
     private long longVar = 1000L;
     private Long LongVar = 2000L;
     private String string = "Random string";
-    public InnerEntity1 innerEntity1 = new InnerEntity1(new InnerEntity2("New Inner2 String"));
+    public InnerEntity1 innerEntity1 = new InnerEntity1(new InnerStaticEntity("New Inner2 String"));
     @Ignore
     private String extra = "Entity : Extra string to be ignored";
 
@@ -41,21 +38,21 @@ public class Entity {
         }
     }
 
-    public static class InnerEntity2 {
+    public static class InnerStaticEntity {
         private String string = "Inner2 string";
         @Ignore
-        private String extra = "InnerEntity2 : Extra string to be ignored";
+        private String extra = "InnerStaticEntity : Extra string to be ignored";
 
-        public InnerEntity2() {}
+        public InnerStaticEntity() {}
 
-        public InnerEntity2(String string) {
+        public InnerStaticEntity(String string) {
             this.string = string;
         }
 
         @Override
         public boolean equals(@Nullable Object obj) {
-            if (obj instanceof InnerEntity2) {
-                InnerEntity2 newObj = (InnerEntity2) obj;
+            if (obj instanceof InnerStaticEntity) {
+                InnerStaticEntity newObj = (InnerStaticEntity) obj;
                 return string.equals(newObj.string);
             } else {
                 return false;

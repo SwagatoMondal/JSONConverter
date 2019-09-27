@@ -18,10 +18,14 @@ public class JSONConverter {
     private static String getName(Class<?> cls) {
         String name = cls.getCanonicalName();
         if (cls.isMemberClass() && cls.getEnclosingClass() != null) {
-            name = cls.getEnclosingClass().getCanonicalName() + "$" + cls.getSimpleName();
+            name = getName(cls.getEnclosingClass()) + "$" + cls.getSimpleName();
         }
         Log.i(TAG, "getName : Found object - " + name);
         return name;
+    }
+
+    private static boolean isNonStaticInnerClass(Class<?> cls, Class<?> field) {
+        return !Modifier.isStatic(cls.getModifiers()) && cls.getEnclosingClass() == field;
     }
 
     /**
@@ -36,6 +40,7 @@ public class JSONConverter {
         try {
             final JSONObject jsonObject = new JSONObject();
             Class type = object.getClass();
+            Log.i(TAG, "toJSON : Processing for " + type.getSimpleName());
             for (Field field : type.getDeclaredFields()) {
                 Class<?> fieldType = field.getType();
 
@@ -43,6 +48,8 @@ public class JSONConverter {
                 if (Modifier.isStatic(field.getModifiers())) {
                     continue;
                 } else if (field.isAnnotationPresent(Ignore.class)) {
+                    continue;
+                } else if (isNonStaticInnerClass(type, fieldType)) {
                     continue;
                 }
 
@@ -102,12 +109,27 @@ public class JSONConverter {
      * @return an equivalent object of the given type filled with the values in the given JSON,
      * otherwise {@code null} in error scenario.
      */
-    public static Object fromJSON(@NonNull JSONObject jsonObject, @NonNull Class<? extends  Object> type) {
+    public static Object fromJSON(@NonNull JSONObject jsonObject, @NonNull Class<?> type) {
+        return fromJSON(jsonObject, type, null);
+    }
+
+    private static Object fromJSON(@NonNull JSONObject jsonObject, @NonNull Class<?> type,
+                                   @Nullable Object enclosing) {
         try {
+            Log.i(TAG, "fromJSON : Processing for " + type.getSimpleName() + "; " +
+                    type + "; " + enclosing);
             Object object;
             try {
-                object = type.getConstructor().newInstance();
+                if (!Modifier.isStatic(type.getModifiers()) && enclosing != null &&
+                        type.getEnclosingClass() == enclosing.getClass()) {
+                    object = type.getConstructor(enclosing.getClass()).newInstance(enclosing);
+                } else {
+                    object = type.getConstructor().newInstance();
+                }
             } catch (NoSuchMethodException m) {
+                Log.e(TAG, "Public zero argument constructor missing for : " + type +
+                        ", hence ignoring");
+                m.printStackTrace();
                 return null;
             }
 
@@ -150,7 +172,7 @@ public class JSONConverter {
                     final JSONObject obj = jsonObject.optJSONObject(field.getName());
                     if (obj != null && obj.has(TYPE)) {
                         Log.i(TAG, "fromJSON : Found JSONObject - " + obj.toString());
-                        field.set(object, fromJSON(obj, Class.forName(obj.getString(TYPE))));
+                        field.set(object, fromJSON(obj, Class.forName(obj.getString(TYPE)), object));
                     } else {
                         Log.i(TAG, "fromJSON : Found null JSONObject or malformed object, hence ignored");
                     }

@@ -24,12 +24,14 @@ public class JSONConverterTest {
     @Test
     public void testFeature() {
         Entity entity = new Entity();
-        entity.innerEntity1.innerEntity2 = new Entity.InnerEntity2("Test JSON string");
+        entity.innerEntity1.innerStaticEntity = new Entity.InnerStaticEntity("Test JSON string");
         final JSONObject result = JSONConverter.toJSON(entity);
         Assert.assertNotNull("Found result null", result);
         Log.d(TAG, "Result : " + result.toString());
-        final Object conversion = JSONConverter.fromJSON(result, Entity.class);
+        Object conversion = JSONConverter.fromJSON(result, Entity.class);
         Assert.assertNotNull("Found conversion null", conversion);
-        Assert.assertEquals(entity, conversion);
+        Assert.assertTrue("Incorrect instance", conversion instanceof Entity);
+        final Entity newEntity = (Entity) conversion;
+        Assert.assertEquals(entity, newEntity);
     }
 }
