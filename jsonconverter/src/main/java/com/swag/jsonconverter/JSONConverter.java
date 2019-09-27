@@ -13,8 +13,15 @@ import java.lang.reflect.Modifier;
 public class JSONConverter {
 
     private static final String TAG = JSONConverter.class.getSimpleName();
-    private static final String TYPE = "typeZZZ";
+    // Unique key to identify the type of the class
+    private static final String TYPE = TAG + "_type_ZZZ";
 
+    /**
+     * Method to get a runtime class path of the given class, which is used by
+     * {@link Class#forName(String)} to create object.
+     * @param cls The class
+     * @return the runtime class path of the given class
+     */
     private static String getName(Class<?> cls) {
         String name = cls.getCanonicalName();
         if (cls.isMemberClass() && cls.getEnclosingClass() != null) {
@@ -24,6 +31,14 @@ public class JSONConverter {
         return name;
     }
 
+    /**
+     * Method to determine whether the given field is the reference added by compiler of the
+     * enclosing class of the given inner class.
+     * @param cls The inner class
+     * @param field The field
+     * @return {@code true} if the given field is the reference added by compiler of the
+     *      enclosing class of the given inner class or {@code false}
+     */
     private static boolean isNonStaticInnerClass(Class<?> cls, Class<?> field) {
         return !Modifier.isStatic(cls.getModifiers()) && cls.getEnclosingClass() == field;
     }
@@ -44,12 +59,11 @@ public class JSONConverter {
             for (Field field : type.getDeclaredFields()) {
                 Class<?> fieldType = field.getType();
 
-                // Ignore static, and force ignored variables
-                if (Modifier.isStatic(field.getModifiers())) {
+                if (Modifier.isStatic(field.getModifiers())/*Ignore static variables*/) {
                     continue;
-                } else if (field.isAnnotationPresent(Ignore.class)) {
+                } else if (field.isAnnotationPresent(Ignore.class)/*Ignoring @Ignore variables*/) {
                     continue;
-                } else if (isNonStaticInnerClass(type, fieldType)) {
+                } else if (isNonStaticInnerClass(type, fieldType)/*Ignoring outer class ref*/) {
                     continue;
                 }
 
