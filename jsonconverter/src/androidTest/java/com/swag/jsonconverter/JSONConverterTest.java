@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.swag.jsonconverter.sample.Child;
 import com.swag.jsonconverter.sample.Entity;
 
 import org.json.JSONObject;
@@ -33,5 +34,18 @@ public class JSONConverterTest {
         Assert.assertTrue("Incorrect instance", conversion instanceof Entity);
         final Entity newEntity = (Entity) conversion;
         Assert.assertEquals(entity, newEntity);
+    }
+
+    @Test
+    public void testInheritance() {
+        Child child = new Child();
+        final JSONObject result = JSONConverter.toJSON(child);
+        Assert.assertNotNull("Found result null", result);
+        Log.d(TAG, "Result : " + result.toString());
+        Object conversion = JSONConverter.fromJSON(result, Child.class);
+        Assert.assertNotNull("Found conversion null", conversion);
+        Assert.assertTrue("Incorrect instance", conversion instanceof Child);
+        final Child newChild = (Child) conversion;
+        Assert.assertEquals(child, newChild);
     }
 }

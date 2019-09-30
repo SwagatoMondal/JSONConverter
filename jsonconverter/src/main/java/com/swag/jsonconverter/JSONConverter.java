@@ -43,19 +43,23 @@ public class JSONConverter {
         return !Modifier.isStatic(cls.getModifiers()) && cls.getEnclosingClass() == field;
     }
 
-    /**
-     * Method to convert the given object to an equivalent {@link JSONObject}. This method will also
-     * consider the member variables in the conversion process in infinite cycle. Any variable
-     * whose type doesn't fall under the types supported type by {@link JSONObject} will be ignored.
-     * @param object The object to be converted
-     * @return the equivalent {@link JSONObject}, otherwise {@code null}
-     */
     @Nullable
-    public static JSONObject toJSON(@NonNull Object object) {
+    private static JSONObject toJSON(@NonNull Object object, Class<?> type) {
         try {
-            final JSONObject jsonObject = new JSONObject();
-            Class type = object.getClass();
+            JSONObject jsonObject = null;
             Log.i(TAG, "toJSON : Processing for " + type.getSimpleName());
+
+            // Process super classes
+            if (type.getSuperclass() != null) {
+                Class parentType = type.getSuperclass();
+                Log.i(TAG, "toJSON : Processing for parent " + parentType.getSimpleName());
+                jsonObject = toJSON(object, parentType);
+            }
+
+            if (null == jsonObject) {
+                jsonObject = new JSONObject();
+            }
+
             for (Field field : type.getDeclaredFields()) {
                 Class<?> fieldType = field.getType();
 
@@ -94,7 +98,7 @@ public class JSONConverter {
                 } else {
                     final Object fieldObj = field.get(object);
                     if (fieldObj != null) {
-                        JSONObject fieldJson = toJSON(fieldObj);
+                        JSONObject fieldJson = toJSON(fieldObj, fieldObj.getClass());
                         if (fieldJson != null) {
                             fieldJson.put(TYPE, getName(fieldType));
                         } else {
@@ -106,6 +110,7 @@ public class JSONConverter {
                     }
                 }
             }
+
             Log.i(TAG, "Returning string");
             return jsonObject;
         } catch (Exception e) {
@@ -113,6 +118,18 @@ public class JSONConverter {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Method to convert the given object to an equivalent {@link JSONObject}. This method will also
+     * consider the member variables in the conversion process in infinite cycle. Any variable
+     * whose type doesn't fall under the types supported type by {@link JSONObject} will be ignored.
+     * @param object The object to be converted
+     * @return the equivalent {@link JSONObject}, otherwise {@code null}
+     */
+    @Nullable
+    public static JSONObject toJSON(@NonNull Object object) {
+        return toJSON(object, object.getClass());
     }
 
     /**
