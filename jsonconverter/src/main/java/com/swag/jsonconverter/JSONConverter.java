@@ -13,23 +13,6 @@ import java.lang.reflect.Modifier;
 public class JSONConverter {
 
     private static final String TAG = JSONConverter.class.getSimpleName();
-    // Unique key to identify the type of the class
-    private static final String TYPE = TAG + "_type_ZZZ";
-
-    /**
-     * Method to get a runtime class path of the given class, which is used by
-     * {@link Class#forName(String)} to create object.
-     * @param cls The class
-     * @return the runtime class path of the given class
-     */
-    private static String getName(Class<?> cls) {
-        String name = cls.getCanonicalName();
-        if (cls.isMemberClass() && cls.getEnclosingClass() != null) {
-            name = getName(cls.getEnclosingClass()) + "$" + cls.getSimpleName();
-        }
-        Log.i(TAG, "getName : Found object - " + name);
-        return name;
-    }
 
     /**
      * Method to determine whether the given field is the reference added by compiler of the
@@ -98,13 +81,7 @@ public class JSONConverter {
                 } else {
                     final Object fieldObj = field.get(object);
                     if (fieldObj != null) {
-                        JSONObject fieldJson = toJSON(fieldObj, fieldObj.getClass());
-                        if (fieldJson != null) {
-                            fieldJson.put(TYPE, getName(fieldType));
-                        } else {
-                            Log.i(TAG, "toJSON : Ignoring field, as null JSON");
-                        }
-                        jsonObject.put(field.getName(), fieldJson);
+                        jsonObject.put(field.getName(), toJSON(fieldObj, fieldObj.getClass()));
                     } else {
                         Log.i(TAG, "toJSON : Ignoring field, as type can't be converted");
                     }
@@ -201,9 +178,9 @@ public class JSONConverter {
                     field.set(object, jsonObject.getString(field.getName()));
                 } else {
                     final JSONObject obj = jsonObject.optJSONObject(field.getName());
-                    if (obj != null && obj.has(TYPE)) {
+                    if (obj != null) {
                         Log.i(TAG, "fromJSON : Found JSONObject - " + obj.toString());
-                        field.set(object, fromJSON(obj, Class.forName(obj.getString(TYPE)), object));
+                        field.set(object, fromJSON(obj, fieldType, object));
                     } else {
                         Log.i(TAG, "fromJSON : Found null JSONObject or malformed object, hence ignored");
                     }
