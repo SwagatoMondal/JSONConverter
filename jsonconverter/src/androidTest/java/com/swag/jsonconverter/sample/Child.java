@@ -8,6 +8,14 @@ public class Child extends Parent {
 
     public Child() {}
 
+    public void addToList(Boolean b) {
+        list.add(b);
+    }
+
+    public int size() {
+        return list.size();
+    }
+
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Child) {

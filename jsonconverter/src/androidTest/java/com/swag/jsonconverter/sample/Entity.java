@@ -1,8 +1,12 @@
 package com.swag.jsonconverter.sample;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.swag.jsonconverter.Ignore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Entity {
     private boolean boolVar = true;
@@ -19,6 +23,8 @@ public class Entity {
     public InnerEntity1 innerEntity1 = new InnerEntity1(new InnerStaticEntity("New Inner2 String"));
     @Ignore
     private String extra = "Entity : Extra string to be ignored";
+    @NonNull
+    public Map<String, InnerStaticEntity> map = new HashMap<>();
 
     public Entity() {
     }
@@ -27,6 +33,20 @@ public class Entity {
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Entity) {
             Entity newObj = (Entity) obj;
+            if (newObj.map == null) {
+                return false;
+            } else if (map.size() != newObj.map.size()) {
+                return false;
+            } else {
+                for (String key : map.keySet()) {
+                    if (newObj.map.containsKey(key) &&
+                            (map.get(key) != null && map.get(key).equals(newObj.map.get(key)))) {
+                        continue;
+                    } else {
+                        return false;
+                    }
+                }
+            }
             return newObj.boolVar == boolVar && newObj.BooleanVar.equals(BooleanVar) &&
                     newObj.intVar == intVar && newObj.integerVar.equals(integerVar) &&
                     newObj.floatVar == floatVar && newObj.FloatVar.equals(FloatVar) &&
@@ -57,6 +77,12 @@ public class Entity {
             } else {
                 return false;
             }
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return string;
         }
     }
 }
