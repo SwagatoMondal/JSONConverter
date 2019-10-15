@@ -15,6 +15,7 @@ import com.swag.jsonconverter.sample.Parent;
 
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,8 +34,14 @@ public class JSONConverterTest {
 
     private static final String TAG = JSONConverterTest.class.getSimpleName();
 
+    @Before
+    public void clear() {
+        JSONConverter.loggingEnabled(false);
+    }
+
     @Test
     public void testFeature() {
+        JSONConverter.loggingEnabled(true);
         final JSONConverter<Entity> converter = new JSONConverter<Entity>().addRule(new RuleKey("map", Entity.class),
                 new MapRule<>(new Constructor<Map<String, Entity.InnerStaticEntity>>() {
             @NonNull
@@ -68,6 +75,7 @@ public class JSONConverterTest {
 
     @Test
     public void testInheritance() {
+        JSONConverter.loggingEnabled(true);
         final JSONConverter<Child> converter = new JSONConverter<Child>().addRule(
                 new RuleKey("list", Parent.class), new ListRule<>(new Constructor<List<Boolean>>() {
                     @NonNull
