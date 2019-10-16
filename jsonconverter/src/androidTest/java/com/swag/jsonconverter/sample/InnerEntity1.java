@@ -11,13 +11,11 @@ import java.util.Map;
 public class InnerEntity1 {
     public Entity.InnerStaticEntity innerStaticEntity;
     private String string = "Inner1 string";
-    InnerEntity2 innerEntity2 = new InnerEntity2();
+    InnerEntity2 innerEntity2 = new InnerEntity2(32.56);
     @Ignore
     private String extra = "InnerEntity1 : Extra string to be ignored";
     @NonNull
     public Map<String, Boolean> map = new HashMap<>();
-
-    public InnerEntity1() {}
 
     InnerEntity1(Entity.InnerStaticEntity innerStaticEntity) {
         this.innerStaticEntity = innerStaticEntity;
@@ -49,21 +47,25 @@ public class InnerEntity1 {
     }
 
     public class InnerEntity2 {
-        private String string = "Inner2 string";
-        protected InnerEntity3 innerEntity3 = new InnerEntity3();
+        private double y;
+        protected InnerEntity3 innerEntity3 = new InnerEntity3(10);
 
-        public InnerEntity2() {}
+        InnerEntity2(double y) {
+            this.y = y;
+        }
 
         public class InnerEntity3 {
-            private String string = "Inner3 string";
+            private int x;
 
-            public InnerEntity3() {}
+            InnerEntity3(int x) {
+                this.x = x;
+            }
 
             @Override
             public boolean equals(@Nullable Object obj) {
                 if (obj instanceof InnerEntity3) {
                     InnerEntity3 entity3 = (InnerEntity3) obj;
-                    return string.equals(entity3.string);
+                    return x == entity3.x;
                 } else {
                     return false;
                 }
@@ -74,7 +76,7 @@ public class InnerEntity1 {
         public boolean equals(@Nullable Object obj) {
             if (obj instanceof InnerEntity2) {
                 InnerEntity2 entity2 = (InnerEntity2) obj;
-                return string.equals(entity2.string) && innerEntity3.equals(entity2.innerEntity3);
+                return y == entity2.y && innerEntity3.equals(entity2.innerEntity3);
             } else {
                 return false;
             }

@@ -10,8 +10,6 @@ public class Parent extends GrandParent {
     private String string = "Parent string";
     List<Boolean> list = new LinkedList<>();
 
-    public Parent() {}
-
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Parent) {

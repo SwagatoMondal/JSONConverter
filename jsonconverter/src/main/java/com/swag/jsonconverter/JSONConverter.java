@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -297,6 +298,18 @@ public class JSONConverter<T> {
         return type.cast(fromJSON(jsonObject, type, null, null));
     }
 
+    private static Object getValueForType(@NonNull Class<?> type) {
+        if (int.class == type || long.class == type) {
+            return 0;
+        } else if (boolean.class == type) {
+            return false;
+        } else if (double.class == type || float.class == type) {
+            return 0.0;
+        } else {
+            return null;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private Object fromJSON(@NonNull JSONObject jsonObject, @NonNull Class<?> type,
                             @Nullable Object enclosing, @Nullable Object object) {
@@ -308,17 +321,32 @@ public class JSONConverter<T> {
 
             if (null == object) {
                 try {
-                    if (!Modifier.isStatic(type.getModifiers()) && enclosing != null &&
-                            type.getEnclosingClass() == enclosing.getClass()) {
-                        object = type.getConstructor(enclosing.getClass()).newInstance(enclosing);
+                    Constructor<?>[] constructors = type.getDeclaredConstructors();
+                    // Default constructor
+                    if (constructors.length == 0) {
+                        object = type.newInstance();
                     } else {
-                        object = type.getConstructor().newInstance();
+                        // Declared constructor
+                        Constructor<?> constructor = constructors[0];
+                        constructor.setAccessible(true);
+                        final int length =  constructor.getParameterTypes().length;
+                        // Default constructor
+                        if (length == 0) {
+                            object = type.newInstance();
+                        } else {
+                            int i = 0;
+                            Object[] params = new Object[length];
+                            for (Class p : constructor.getParameterTypes()) {
+                                params[i++] = getValueForType(p);
+                            }
+                            object = constructor.newInstance(params);
+                        }
                     }
-                } catch (NoSuchMethodException m) {
+                } catch (Exception g) {
                     if (loggingEnabled) {
-                        Log.e(TAG, "Public zero argument constructor missing for : " + type +
+                        Log.e(TAG, "Something went wrong while creating object for : " + type +
                                 ", hence ignoring");
-                        m.printStackTrace();
+                        g.printStackTrace();
                     }
                     return null;
                 }

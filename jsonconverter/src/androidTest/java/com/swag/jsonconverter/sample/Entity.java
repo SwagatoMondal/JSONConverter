@@ -26,9 +26,6 @@ public class Entity {
     @NonNull
     public Map<String, InnerStaticEntity> map = new HashMap<>();
 
-    public Entity() {
-    }
-
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof Entity) {
@@ -59,11 +56,9 @@ public class Entity {
     }
 
     public static class InnerStaticEntity {
-        private String string = "Inner2 string";
+        private String string;
         @Ignore
         private String extra = "InnerStaticEntity : Extra string to be ignored";
-
-        public InnerStaticEntity() {}
 
         public InnerStaticEntity(String string) {
             this.string = string;

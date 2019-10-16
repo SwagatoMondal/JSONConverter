@@ -6,8 +6,6 @@ public class Child extends Parent {
 
     private String childString = "Child string";
 
-    public Child() {}
-
     public void addToList(Boolean b) {
         list.add(b);
     }
