@@ -35,7 +35,12 @@ JSONObject json = converter.toJSON(obj);
 T obj = converter.fromJSON(jsonString, classType);
 ```
 ### Misc
-You can ignore fields which you do not want to be part of JSON by adding @Ignore annotation
-
+You can ignore fields which you do not want to be part of JSON by adding **@Ignore** annotation
+```
+public static class YourClass {
+   @Ignore
+   private String extra = "Extra string to be ignored";
+}
+```
 ## As Library
 The library equivalent is also available in library folder in root folder, just integrate the same in app.
