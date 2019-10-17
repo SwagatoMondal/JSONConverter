@@ -332,7 +332,7 @@ public class JSONConverter<T> {
                         final int length =  constructor.getParameterTypes().length;
                         // Default constructor
                         if (length == 0) {
-                            object = type.newInstance();
+                            object = constructor.newInstance();
                         } else {
                             int i = 0;
                             Object[] params = new Object[length];
