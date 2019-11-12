@@ -49,7 +49,9 @@ public class JSONConverter<T> {
             return false;
         } else if (o1.getClass() == Integer.class && o2.getClass() == Long.class) {
             return ((Integer) o1).intValue() == (((Long) o2).intValue());
-        } else return o1.equals(o2);
+        } else {
+            return o1.equals(o2);
+        }
     }
 
     /**
@@ -151,6 +153,38 @@ public class JSONConverter<T> {
                 || Boolean.class == type || double.class == type || Double.class == type
                 || float.class == type || Float.class == type || long.class == type
                 || Long.class == type || String.class == type;
+    }
+
+    @NonNull
+    private static Object getValueFromJSONArray(@NonNull JSONArray jsonObject, int index,
+                                                @NonNull Class<?> fieldType) throws JSONException {
+        if (Integer.class == fieldType) {
+            return jsonObject.getInt(index);
+        } else if (Double.class == fieldType) {
+            return jsonObject.getDouble(index);
+        } else if (Float.class == fieldType) {
+            return (float) jsonObject.getDouble(index);
+        } else if (Long.class == fieldType) {
+            return jsonObject.getLong(index);
+        } else {
+            return jsonObject.get(index);
+        }
+    }
+
+    @NonNull
+    private static Object getValueFromJSONObject(@NonNull JSONObject jsonObject, @NonNull String name,
+                                                 @NonNull Class<?> fieldType) throws JSONException {
+        if (Integer.class == fieldType) {
+            return jsonObject.getInt(name);
+        } else if (Double.class == fieldType) {
+            return jsonObject.getDouble(name);
+        } else if (Float.class == fieldType) {
+            return (float) jsonObject.getDouble(name);
+        } else if (Long.class == fieldType) {
+            return jsonObject.getLong(name);
+        } else {
+            return jsonObject.get(name);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -261,9 +295,6 @@ public class JSONConverter<T> {
                 }
             }
 
-            if (loggingEnabled) {
-                Log.i(TAG, "Returning string");
-            }
             return jsonObject;
         } catch (Exception e) {
             if (loggingEnabled) {
@@ -418,7 +449,8 @@ public class JSONConverter<T> {
                             while (keys.hasNext()) {
                                 String key = keys.next();
                                 final Object put = jsonSupported(mapRule.getValueClass()) ?
-                                        mapRule.getValueClass().cast(mapJson.get(key)) :
+                                        mapRule.getValueClass().cast(getValueFromJSONObject(
+                                                mapJson, key, mapRule.getValueClass())) :
                                         fromJSON(mapJson.getJSONObject(key), mapRule.getValueClass());
                                 mapRule.write(key, put, toAssign);
                             }
@@ -441,7 +473,7 @@ public class JSONConverter<T> {
                             final ListRule listRule = (ListRule) types;
                             List toAssign = listRule.construct();
                             for (int i = 0; i < listJson.length(); i++) {
-                                final Object val = listJson.get(i);
+                                final Object val = getValueFromJSONArray(listJson, i, listRule.getValueClass());
                                 final Object put = jsonSupported(val.getClass()) ?
                                         listRule.getValueClass().cast(val) :
                                         fromJSON(listJson.getJSONObject(i), listRule.getValueClass());
